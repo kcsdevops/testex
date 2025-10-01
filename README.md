@@ -1,7 +1,8 @@
-# Projeto TESTEX - Automação de Terminação de Contratos
+# TESTEX - Sistema de Terminação de Contratos
 
-## Descrição
-Sistema de automação para terminação de contratos com integração ao Active Directory, UMA e sistemas de arquivos.
+## 📋 Visão Geral
+
+O **TESTEX** é um sistema automatizado para terminação de contratos que integra múltiplas plataformas e sistemas empresariais. Desenvolvido em PowerShell com módulos especializados, o sistema oferece operações coordenadas para banco de dados, Active Directory, sistema de arquivos e integração com APIs externas.
 
 ## Estrutura do Projeto
 

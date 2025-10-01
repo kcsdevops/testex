@@ -1,0 +1,125 @@
+pipeline {
+    agent any
+    
+    parameters {
+        string(name: 'CLIENTE_ID', defaultValue: '', description: 'ID do cliente para terminação')
+        choice(name: 'OPERACAO', choices: ['TERMINO_CONTRATO', 'VALIDACAO_PURGE'], description: 'Tipo de operação')
+        booleanParam(name: 'EXECUTAR_BACKUP', defaultValue: true, description: 'Executar backup antes da operação')
+    }
+    
+    environment {
+        POWERSHELL_PATH = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe'
+        PROJECT_PATH = "${WORKSPACE}\\TESTEX"
+    }
+    
+    stages {
+        stage('Validação de Parâmetros') {
+            steps {
+                script {
+                    if (params.CLIENTE_ID == '') {
+                        error('CLIENTE_ID é obrigatório')
+                    }
+                }
+                echo "Iniciando operação: ${params.OPERACAO} para cliente: ${params.CLIENTE_ID}"
+            }
+        }
+        
+        stage('Configuração do Ambiente') {
+            steps {
+                echo 'Configurando credenciais e ambiente...'
+                bat """
+                    cd "${PROJECT_PATH}"
+                    ${POWERSHELL_PATH} -ExecutionPolicy Bypass -File Setup-Credentials.ps1
+                """
+            }
+        }
+        
+        stage('Validação do Sistema') {
+            steps {
+                echo 'Validando conectividade com sistemas...'
+                bat """
+                    cd "${PROJECT_PATH}"
+                    ${POWERSHELL_PATH} -ExecutionPolicy Bypass -File Test-SystemValidation.ps1
+                """
+            }
+        }
+        
+        stage('Backup (Se Habilitado)') {
+            when {
+                params.EXECUTAR_BACKUP == true
+            }
+            steps {
+                echo 'Executando backup do banco de dados...'
+                bat """
+                    cd "${PROJECT_PATH}"
+                    ${POWERSHELL_PATH} -ExecutionPolicy Bypass -Command "python-scripts\\database_backup.py ${params.CLIENTE_ID}"
+                """
+            }
+        }
+        
+        stage('Execução da Operação') {
+            steps {
+                script {
+                    if (params.OPERACAO == 'TERMINO_CONTRATO') {
+                        echo "Executando terminação de contrato para ${params.CLIENTE_ID}..."
+                        bat """
+                            cd "${PROJECT_PATH}"
+                            ${POWERSHELL_PATH} -ExecutionPolicy Bypass -File TerminoContrato-Main.ps1 -ClienteId ${params.CLIENTE_ID}
+                        """
+                    } else if (params.OPERACAO == 'VALIDACAO_PURGE') {
+                        echo "Executando validação de purge para ${params.CLIENTE_ID}..."
+                        bat """
+                            cd "${PROJECT_PATH}"
+                            ${POWERSHELL_PATH} -ExecutionPolicy Bypass -File Scripts\\Execute-Purge.ps1 -ClienteId ${params.CLIENTE_ID}
+                        """
+                    }
+                }
+            }
+        }
+        
+        stage('Geração de Relatórios') {
+            steps {
+                echo 'Gerando relatórios da operação...'
+                bat """
+                    cd "${PROJECT_PATH}"
+                    python python-scripts\\generate_purge_report.py ${params.CLIENTE_ID}
+                """
+            }
+        }
+        
+        stage('Notificação') {
+            steps {
+                echo 'Enviando notificações...'
+                bat """
+                    cd "${PROJECT_PATH}"
+                    python python-scripts\\send_notification.py ${params.CLIENTE_ID} "${params.OPERACAO}"
+                """
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Coletando logs e artefatos...'
+            archiveArtifacts artifacts: 'Logs/**/*.log', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'Reports/**/*.json', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'Reports/**/*.html', allowEmptyArchive: true
+        }
+        success {
+            echo 'Pipeline executado com sucesso!'
+            emailext (
+                subject: "TESTEX: ${params.OPERACAO} concluída com sucesso - Cliente ${params.CLIENTE_ID}",
+                body: "A operação ${params.OPERACAO} foi concluída com sucesso para o cliente ${params.CLIENTE_ID}.",
+                to: "${env.CHANGE_AUTHOR_EMAIL}"
+            )
+        }
+        failure {
+            echo 'Pipeline falhou!'
+            emailext (
+                subject: "TESTEX: Falha na operação ${params.OPERACAO} - Cliente ${params.CLIENTE_ID}",
+                body: "A operação ${params.OPERACAO} falhou para o cliente ${params.CLIENTE_ID}. Verifique os logs.",
+                to: "${env.CHANGE_AUTHOR_EMAIL}"
+            )
+        }
+    }
+}

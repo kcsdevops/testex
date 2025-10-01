@@ -1,0 +1,40 @@
+# TESTEX Requirements
+# Dependências Python para os simuladores do TESTEX
+
+# Core dependencies
+requests>=2.31.0
+urllib3>=2.0.0
+
+# Data processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Database connectivity
+sqlalchemy>=2.0.0
+pyodbc>=4.0.39
+pymssql>=2.2.8
+
+# File handling
+pathlib2>=2.3.7
+zipfile38>=0.0.3
+
+# Utilities
+python-dateutil>=2.8.2
+chardet>=5.2.0
+
+# Logging and monitoring
+loguru>=0.7.0
+colorama>=0.4.6
+
+# Configuration
+python-dotenv>=1.0.0
+pyyaml>=6.0.1
+
+# Testing (optional)
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Development tools (optional)
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.5.0

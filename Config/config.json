@@ -1,0 +1,44 @@
+{
+  "project": {
+    "name": "TESTEX - Automação Terminação de Contratos",
+    "version": "1.0.0",
+    "environment": "production"
+  },
+  "database": {
+    "server": "localhost",
+    "database": "TerminacaoContratos",
+    "integratedSecurity": true,
+    "connectionTimeout": 30
+  },
+  "activeDirectory": {
+    "domain": "empresa.local",
+    "server": "dc01.empresa.local",
+    "port": 389,
+    "useSSL": true
+  },
+  "fileSystem": {
+    "basePathPR4": "\\\\servidor\\arquivos\\pr4",
+    "backupPath": "\\\\servidor\\backup",
+    "logPath": ".\\Logs"
+  },
+  "uma": {
+    "apiUrl": "https://uma.empresa.com/api",
+    "timeout": 60,
+    "retryAttempts": 3
+  },
+  "email": {
+    "smtpServer": "mail.empresa.com",
+    "port": 587,
+    "useSSL": true,
+    "fromAddress": "automacao@empresa.com"
+  },
+  "logging": {
+    "level": "INFO",
+    "maxLogFiles": 10,
+    "maxLogSizeMB": 50
+  },
+  "jenkins": {
+    "url": "http://jenkins.empresa.com:8080",
+    "jobName": "TerminacaoContrato-Pipeline"
+  }
+}
