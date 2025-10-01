@@ -1,0 +1,51 @@
+# Projeto TESTEX - .gitignore
+
+# Arquivos de sistema Windows
+*.tmp
+*.temp
+*.log
+NTUSER.DAT*
+ntuser.dat*
+desktop.ini
+Thumbs.db
+
+# Diretórios de sistema
+AppData/
+Documents/
+Downloads/
+Pictures/
+Videos/
+Music/
+OneDrive*/
+.Azure/
+.vscode*/
+.cursor/
+.docker/
+.nuget/
+.config/
+.cache/
+
+# Arquivos grandes
+*.pack
+*.exe
+*.zip
+*.psd
+*.war
+
+# Builds e caches
+.next/
+.terraform/
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs
+*.log
+logs/
+*.out
+
+# Arquivos temporários de desenvolvimento
+temp-testex/
+Logs/
+Reports/
