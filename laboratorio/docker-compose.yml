@@ -1,0 +1,144 @@
+# TESTEX Laboratory Environment
+# Docker Compose para ambiente de testes completo
+
+version: '3.8'
+
+services:
+  # SQL Server para testes de banco de dados
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: testex_sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=TestexSQL2024!
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+      - ./test-data/sql:/docker-entrypoint-initdb.d
+    networks:
+      - testex_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P TestexSQL2024! -Q 'SELECT 1'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # OpenLDAP para simulação do Active Directory
+  openldap:
+    image: bitnami/openldap:latest
+    container_name: testex_ldap
+    environment:
+      - LDAP_ADMIN_USERNAME=admin
+      - LDAP_ADMIN_PASSWORD=testexldap123
+      - LDAP_USERS=user01,user02,user03
+      - LDAP_PASSWORDS=password1,password2,password3
+      - LDAP_ROOT=dc=testex,dc=local
+      - LDAP_ADMIN_DN=cn=admin,dc=testex,dc=local
+    ports:
+      - "389:1389"
+      - "636:1636"
+    volumes:
+      - ldap_data:/bitnami/openldap
+      - ./test-data/ldap:/ldifs
+    networks:
+      - testex_network
+    restart: unless-stopped
+
+  # phpLDAPadmin para gerenciamento LDAP via web
+  phpldapadmin:
+    image: osixia/phpldapadmin:latest
+    container_name: testex_ldap_admin
+    environment:
+      - PHPLDAPADMIN_LDAP_HOSTS=openldap
+      - PHPLDAPADMIN_HTTPS=false
+    ports:
+      - "8080:80"
+    depends_on:
+      - openldap
+    networks:
+      - testex_network
+    restart: unless-stopped
+
+  # File Server SMB/CIFS
+  samba:
+    image: dperson/samba:latest
+    container_name: testex_fileserver
+    environment:
+      - TZ=America/Sao_Paulo
+    ports:
+      - "139:139"
+      - "445:445"
+    volumes:
+      - ./test-data/files:/shared
+    command: >
+      -u "testuser;testpass"
+      -s "testex;/shared;yes;no;no;testuser"
+      -s "backups;/shared/backups;yes;no;no;testuser"
+    networks:
+      - testex_network
+    restart: unless-stopped
+
+  # API UMA Simulator (Flask)
+  uma-api:
+    build:
+      context: ./docker/uma-api
+      dockerfile: Dockerfile
+    container_name: testex_uma_api
+    environment:
+      - FLASK_ENV=development
+      - API_KEY=testex-uma-key-2024
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./test-data/uma:/app/data
+      - ./logs:/app/logs
+    networks:
+      - testex_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Email Server (MailHog para testes)
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: testex_mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - testex_network
+    restart: unless-stopped
+
+  # Python Test Environment
+  python-env:
+    build:
+      context: ./docker/python-env
+      dockerfile: Dockerfile
+    container_name: testex_python_env
+    volumes:
+      - ../python-scripts:/app/scripts
+      - ./test-data:/app/data
+      - ./logs:/app/logs
+    networks:
+      - testex_network
+    command: tail -f /dev/null  # Keep container running
+    restart: unless-stopped
+
+volumes:
+  sqlserver_data:
+    driver: local
+  ldap_data:
+    driver: local
+
+networks:
+  testex_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

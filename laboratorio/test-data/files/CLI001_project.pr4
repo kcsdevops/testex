@@ -1,0 +1,25 @@
+# Arquivo de exemplo para CLI001
+# Tipo: Project File (.pr4)
+# Data: 2024-10-01
+
+[PROJECT]
+Name=Sistema CLI001
+Version=2.3.1
+Client=CLI001
+Status=Active
+Environment=Production
+
+[DATABASE]
+Server=testex-sql
+Database=CLI001_DB
+BackupFrequency=Daily
+
+[FILES]
+Config=cli001_config.xml
+Data=cli001_data.dat
+Logs=cli001_system.log
+
+[SETTINGS]
+AutoBackup=true
+Retention=90
+Notifications=enabled

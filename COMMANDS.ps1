@@ -21,7 +21,9 @@ Write-Host "   .\Test-SystemValidation.ps1" -ForegroundColor White
 Write-Host ""
 Write-Host "5. LABORATÓRIO DE DEMONSTRAÇÃO:" -ForegroundColor Cyan
 Write-Host "   cd laboratorio" -ForegroundColor White
-Write-Host "   .\start-demo.ps1" -ForegroundColor White
+Write-Host "   .\lab.ps1 start          # Inicia laboratório" -ForegroundColor White
+Write-Host "   .\lab.ps1 test           # Testa conectividade" -ForegroundColor White
+Write-Host "   .\lab.ps1 status         # Status dos serviços" -ForegroundColor White
 Write-Host ""
 Write-Host "6. DEMONSTRAÇÃO RÁPIDA:" -ForegroundColor Cyan
 Write-Host "   python demo.py" -ForegroundColor White
