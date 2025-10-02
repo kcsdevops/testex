@@ -20,6 +20,7 @@ TESTEX Lambda System
 ## 🚀 Funcionalidades
 
 ### Core Lambda Functions
+
 - **Contract Processor**: Processa terminações de contrato
 - **Database Manager**: Operações CRUD no DynamoDB
 - **File Handler**: Upload/download de arquivos no S3
@@ -27,6 +28,7 @@ TESTEX Lambda System
 - **API Gateway**: Endpoints REST para integração
 
 ### AWS Services
+
 - **AWS Lambda**: Execução serverless
 - **DynamoDB**: Banco de dados NoSQL
 - **S3**: Armazenamento de arquivos
@@ -83,6 +85,7 @@ TESTEX Lambda System
 ## 🚀 Deployment
 
 ### Usando AWS CDK
+
 ```bash
 cd infrastructure/cdk
 npm install
@@ -91,6 +94,7 @@ cdk deploy
 ```
 
 ### Usando Serverless Framework
+
 ```bash
 npm install -g serverless
 serverless deploy
@@ -120,6 +124,7 @@ pytest --cov=src tests/
 ## 🔧 Configuração
 
 Variáveis de ambiente necessárias:
+
 - `DYNAMODB_TABLE_NAME`
 - `S3_BUCKET_NAME`
 - `SES_FROM_EMAIL`
